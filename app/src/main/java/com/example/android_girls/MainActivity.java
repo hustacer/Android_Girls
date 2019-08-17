@@ -3,8 +3,10 @@ package com.example.android_girls;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -25,7 +27,10 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private List<GirlBean> mGirlBeanList;
     private GirlsAdapter mGirlsAdapter;
-    private static String URL = "http://www.imooc.com/api/teacher?type=4&num=30";
+//    private static String URL = "http://www.imooc.com/api/teacher?type=4&num=30";
+//    private static String URL = "https://api.ooopn.com/image/beauty/api.php?type=json";
+    private static String URL = "http://api.tianapi.com/meinv/?key=cf89613c7575ae4673c4c9b1d2861ed4&num=10";
+    private List<GirlBean> mGirlListTemp = new ArrayList<GirlBean>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,10 +42,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initDataAndView() {
-        new NewsAsyncTask().execute(URL);
+//        for (int i = 0; i < 10; i++) {
+//            new NewsAsyncTask().execute(URL);
+//        }
 
+        new NewsAsyncTask().execute(URL);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+//        mRecyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        if(mRecyclerView.getRecycledViewPool()!=null){
+            mRecyclerView.getRecycledViewPool().setMaxRecycledViews(0, 10);
+        }
+
     }
 
 
@@ -53,6 +66,18 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(List<GirlBean> girlBeans) {
             super.onPostExecute(girlBeans);
+//
+//            //-------------------------------------------
+//            GirlBean girlBean;
+//            for (int i = 0; i < girlBeans.size(); i++) {
+//                girlBean = new GirlBean();
+//                girlBean.title = "picture";
+//                girlBean.img_url = girlBeans.get(i).img_url;
+//                mGirlListTemp.add(girlBean);
+//            }
+//            //-------------------------------------------
+//
+//            mGirlsAdapter = new GirlsAdapter(MainActivity.this, mGirlListTemp);
             mGirlsAdapter = new GirlsAdapter(MainActivity.this, girlBeans);
             mGirlBeanList = girlBeans;
             mRecyclerView.setAdapter(mGirlsAdapter);
@@ -81,12 +106,15 @@ public class MainActivity extends AppCompatActivity {
             GirlBean girlBean;
             try {
                 jsonObject =new JSONObject(jsonString);
-                JSONArray jsonArray =jsonObject.getJSONArray("data");
+                JSONArray jsonArray =jsonObject.getJSONArray("newslist");
+//                JSONArray jsonArray =jsonObject.getJSONArray("data");
                 for(int i = 0;i < jsonArray.length(); i++ ){
                     jsonObject = jsonArray.getJSONObject(i);
                     girlBean = new GirlBean();
-                    girlBean.title =jsonObject.getString("description");
-                    girlBean.img_url = jsonObject.getString("picSmall");
+                    girlBean.title =jsonObject.getString("title");
+                    girlBean.img_url = jsonObject.getString("picUrl");
+//                    girlBean.title =jsonObject.getString("description");
+//                    girlBean.img_url = jsonObject.getString("picSmall");
                     girlList.add(girlBean);
                 }
             } catch (JSONException e) {

@@ -1,14 +1,24 @@
 package com.example.android_girls;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
+
 import java.util.List;
+
+import static com.example.android_girls.R.mipmap.ic_launcher;
 
 public class GirlsAdapter extends RecyclerView.Adapter<GirlsViewHolder> {
     private Context mContext;
@@ -43,9 +53,37 @@ public class GirlsAdapter extends RecyclerView.Adapter<GirlsViewHolder> {
     @Override
     public void onBindViewHolder(final GirlsViewHolder viewHolder, int position) {
         String url = mGirlList.get(position).img_url;
+        Log.d("android_gitls:onBindViewHolder", "" + mGirlList.size());
 
+        viewHolder.imageView.setImageResource(ic_launcher);
         viewHolder.imageView.setTag(url);
-        mImageLoader.showImageByAsyncTask(viewHolder.imageView, url);
+//        mImageLoader.showImageByAsyncTask(viewHolder.imageView, url);
+        Glide.with(mContext)
+                .asBitmap()
+                .load(url)
+//                .into(new TransformationUtils(viewHolder.imageView));
+                //.into(viewHolder.imageView);
+                .into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        //图片原始宽度
+                        int width = resource.getWidth();
+                        //图片原始高度
+                        int height = resource.getHeight();
+
+                        //获取屏幕的宽度
+                        int screenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
+                        //获取比例
+                        float sy = (float) (screenWidth / 2) / (float) width;
+
+                        //计算图片等比例放大后的高
+                        int imageViewHeight = (int) (height * sy);
+                        ViewGroup.LayoutParams params = viewHolder.imageView.getLayoutParams();
+                        params.height = imageViewHeight;
+                        viewHolder.imageView.setLayoutParams(params);
+                        viewHolder.imageView.setImageBitmap(resource);
+                    }
+                });
 
         viewHolder.textView.setText(mGirlList.get(position).title);
         setItemEvent(viewHolder, position);
@@ -53,6 +91,7 @@ public class GirlsAdapter extends RecyclerView.Adapter<GirlsViewHolder> {
 
     @Override
     public int getItemCount() {
+        Log.d("android_gitls:", "" + mGirlList.size());
         return mGirlList.size();
     }
 
